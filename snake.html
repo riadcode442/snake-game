@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Game (Mobile Friendly)</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            border: 2px solid black;
+        }
+        .controls {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .row {
+            display: flex;
+            justify-content: center;
+        }
+        button {
+            width: 60px;
+            height: 60px;
+            font-size: 20px;
+            margin: 5px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        button:active {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Snake Game</h1>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+
+    <!-- Mobile Controls -->
+    <div class="controls">
+        <div class="row">
+            <button onclick="changeDirection('UP')">⬆️</button>
+        </div>
+        <div class="row">
+            <button onclick="changeDirection('LEFT')">⬅️</button>
+            <button onclick="changeDirection('DOWN')">⬇️</button>
+            <button onclick="changeDirection('RIGHT')">➡️</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        const box = 20; // Snake and food size
+        let snake = [{ x: 200, y: 200 }];
+        let direction = "RIGHT";
+        let food = {
+            x: Math.floor(Math.random() * (canvas.width / box)) * box,
+            y: Math.floor(Math.random() * (canvas.height / box)) * box
+        };
+
+        function drawSnake() {
+            ctx.fillStyle = "green";
+            snake.forEach(segment => {
+                ctx.fillRect(segment.x, segment.y, box, box);
+                ctx.strokeStyle = "black";
+                ctx.strokeRect(segment.x, segment.y, box, box);
+            });
+        }
+
+        function drawFood() {
+            ctx.fillStyle = "red";
+            ctx.fillRect(food.x, food.y, box, box);
+        }
+
+        function moveSnake() {
+            let head = { ...snake[0] };
+            if (direction === "UP") head.y -= box;
+            if (direction === "DOWN") head.y += box;
+            if (direction === "LEFT") head.x -= box;
+            if (direction === "RIGHT") head.x += box;
+
+            // Check collision with walls
+            if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height) {
+                alert("Game Over!");
+                document.location.reload();
+            }
+
+            // Check collision with itself
+            for (let i = 1; i < snake.length; i++) {
+                if (head.x === snake[i].x && head.y === snake[i].y) {
+                    alert("Game Over!");
+                    document.location.reload();
+                }
+            }
+
+            snake.unshift(head); // Add new head
+
+            // Check if the snake eats food
+            if (head.x === food.x && head.y === food.y) {
+                food = {
+                    x: Math.floor(Math.random() * (canvas.width / box)) * box,
+                    y: Math.floor(Math.random() * (canvas.height / box)) * box
+                };
+            } else {
+                snake.pop(); // Remove the tail if no food is eaten
+            }
+        }
+
+        function updateGame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawFood();
+            moveSnake();
+            drawSnake();
+        }
+
+        function changeDirection(newDirection) {
+            if (newDirection === "UP" && direction !== "DOWN") direction = "UP";
+            if (newDirection === "DOWN" && direction !== "UP") direction = "DOWN";
+            if (newDirection === "LEFT" && direction !== "RIGHT") direction = "LEFT";
+            if (newDirection === "RIGHT" && direction !== "LEFT") direction = "RIGHT";
+        }
+
+        setInterval(updateGame, 100);
+    </script>
+</body>
+</html>
